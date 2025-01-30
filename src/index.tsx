@@ -31,7 +31,7 @@ const App = () => {
 					'--bg-color': articleState.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm defaultValues={articleState} onApply={handleApply} />
+			<ArticleParamsForm onApply={handleApply} />
 			<Article />
 		</main>
 	);

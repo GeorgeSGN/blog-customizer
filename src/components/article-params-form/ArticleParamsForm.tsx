@@ -3,6 +3,7 @@ import { Button } from 'src/ui/button';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
 import {
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -10,40 +11,29 @@ import {
 	backgroundColors,
 	contentWidthArr,
 	OptionType,
+	defaultArticleState,
 } from 'src/constants/articleProps';
 
-import { useState, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 
 import styles from './ArticleParamsForm.module.scss';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+
+import clsx from 'clsx';
 
 type FormPropsType = {
-	defaultValues: {
-		fontFamilyOption: OptionType;
-		fontSizeOption: OptionType;
-		fontColor: OptionType;
-		backgroundColor: OptionType;
-		contentWidth: OptionType;
-	};
-	onApply: (values: FormPropsType['defaultValues']) => void;
+	onApply: (values: typeof defaultArticleState) => void;
 };
 
-export const ArticleParamsForm = ({
-	defaultValues,
-	onApply,
-}: FormPropsType) => {
+export const ArticleParamsForm = ({ onApply }: FormPropsType) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const toggleForm = () => setIsOpen(!isOpen);
 
-	const [formState, setFormState] = useState({
-		fontFamilyOption: fontFamilyOptions[0],
-		fontColor: fontColors[0],
-		backgroundColor: backgroundColors[0],
-		contentWidth: contentWidthArr[0],
-		fontSizeOption: fontSizeOptions[0],
-	});
+	const [formState, setFormState] = useState(defaultArticleState);
 
 	const handleFormReset = () => {
-		setFormState(defaultValues);
+		setFormState(defaultArticleState);
+		onApply(defaultArticleState);
 	};
 
 	const handleChange = (key: keyof typeof formState, value: OptionType) => {
@@ -55,20 +45,27 @@ export const ArticleParamsForm = ({
 		onApply(formState);
 	};
 
+	const wrapperRef = useRef(null);
+
+	useOutsideClickClose({
+		isOpen,
+		onChange: setIsOpen,
+		rootRef: wrapperRef,
+	});
+
 	return (
 		<>
 			<ArrowButton isOpen={isOpen} onClick={toggleForm} />
 			<aside
-				className={
-					isOpen
-						? `${styles.container} ${styles.container_open}`
-						: styles.container
-				}>
+				ref={wrapperRef}
+				className={clsx(styles.container, isOpen && styles.container_open)}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
 					onReset={handleFormReset}>
-					<h2 className={styles.title}>ЗАДАЙТЕ ПАРАМЕТРЫ</h2>
+					<Text as='h2' size={31} weight={800} uppercase dynamicLite>
+						Задайте параметры
+					</Text>
 					<Select
 						onChange={(value) => handleChange('fontFamilyOption', value)}
 						selected={formState.fontFamilyOption}
